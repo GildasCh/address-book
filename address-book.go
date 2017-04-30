@@ -3,50 +3,42 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/GildasCh/fermentation-notebook/model"
+	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
 )
 
+var db *bolt.DB
+
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage:", os.Args[0], "path/to/addresses.yaml")
+		fmt.Println("Usage:", os.Args[0], "path/to/addresses.db")
 		return
 	}
 
-	as, err := readAddresses(os.Args[1])
+	db, err := bolt.Open(os.Args[1], 0600, nil)
 	if err != nil {
-		fmt.Println("Error reading addresses:", err)
-		return
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	AddFromDB()
+
+	if len(os.Args) >= 2 {
+		AddFromYaml(os.Args[2])
 	}
 
-	err = serve(as)
+	err = serve()
 	fmt.Println(err)
 }
 
-func readAddresses(input string) (as Addresses, err error) {
-	af, err := os.Open(input)
-	if err != nil {
-		return
-	}
-	ab, err := ioutil.ReadAll(af)
-	if err != nil {
-		return
-	}
-
-	as, err = ParseAddresses(ab)
-	if err != nil {
-		return
-	}
-	return
-}
-
-func serve(as Addresses) error {
+func serve() error {
 	batchesHandler := func(w http.ResponseWriter, r *http.Request) {
 		t, err := template.New("address-book.html").Funcs(template.FuncMap{
 			"nl2br": func(s string) template.HTML {
@@ -62,8 +54,8 @@ func serve(as Addresses) error {
 			fmt.Println(err)
 		}
 		err = t.Execute(w, struct {
-			Addresses
-		}{as})
+			AddrByTown
+		}{ByTown()})
 		if err != nil {
 			fmt.Println(err)
 		}

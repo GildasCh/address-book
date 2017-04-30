@@ -9,7 +9,7 @@
   <body>
     <h1>Addresses</h1>
     <ul>
-      {{ range $town, $as := .Addresses }}
+      {{ range $town, $as := .AddrByTown }}
       <h2>{{ $town }}</h2>
       {{ range $a := $as }}
       <li>
