@@ -1,0 +1,13 @@
+- name: Cave de la Société Parisienne de Bière
+  town: Paris
+  address: 5 Rue des Moines, 75017 Paris
+  type: Cave
+- name: Chez Alain
+  town: Rennes
+  address: 18 Rue Poullain Duparc, 35000 Rennes
+- name: Le Triangle
+  town: Paris
+  address: 13 Rue Jacques Louvel-Tessier, 75010 Paris
+  type: Restaurant et Micro-brasserie
+  comment: |
+    Cuisine fine et bières de grande qualité

@@ -1,0 +1,17 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <link rel="stylesheet" href="style.css" />
+    <title>Addresses</title>
+  </head>
+  <body>
+    <h1>Addresses</h1>
+    <ul>
+      {{ range $a := .Addresses }}
+      <li>{{ $a.Name }}: {{ $a.Address }}</li>
+      {{ end }}
+    </ul>
+  </body>
+</html>
