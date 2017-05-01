@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/boltdb/bolt"
+
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -27,17 +29,21 @@ func Add(a *Address) error {
 		addresses = make(map[string]*Address)
 	}
 
-	key := Key(a)
-	if _, ok := addresses[key]; ok {
+	if _, ok := addresses[a.Key()]; ok {
 		return errors.New("This Town/Name combinasion exists already.")
 	}
 
-	addresses[key] = a
+	addresses[a.Key()] = a
 	return nil
 }
 
-func Key(a *Address) string {
+func (a *Address) Key() string {
 	return a.Town + "/" + a.Name
+}
+
+func (a *Address) Yaml() string {
+	out, _ := yaml.Marshal(*a)
+	return string(out)
 }
 
 func ParseAddresses(input []byte) (as []*Address, err error) {
@@ -47,7 +53,35 @@ func ParseAddresses(input []byte) (as []*Address, err error) {
 }
 
 func AddFromDB() {
+}
 
+func SaveToDB() {
+	err := db.Update(func(tx *bolt.Tx) error {
+		var err error
+		b := tx.Bucket([]byte("address"))
+		if b == nil {
+			b, err = tx.CreateBucket([]byte("address"))
+			if err != nil {
+				return fmt.Errorf("create bucket: %s", err)
+			}
+		}
+
+		for _, a := range addresses {
+			if v := b.Get([]byte(a.Key())); v != nil {
+				// Key exists
+				fmt.Println(a.Key(), "was not saved in DB because it already exists.")
+			}
+			err = b.Put([]byte(a.Key()), []byte(a.Yaml()))
+			if err != nil {
+				fmt.Println("Error saving", a.Key(), "to DB.")
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		fmt.Println("Transaction failed:", err)
+	}
 }
 
 func AddFromYaml(input string) error {

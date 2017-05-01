@@ -17,12 +17,13 @@ import (
 var db *bolt.DB
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage:", os.Args[0], "path/to/addresses.db")
-		return
-	}
+	// if len(os.Args) < 2 {
+	// 	fmt.Println("Usage:", os.Args[0], "path/to/addresses.db")
+	// 	return
+	// }
 
-	db, err := bolt.Open(os.Args[1], 0600, nil)
+	// db, err := bolt.Open(os.Args[1], 0600, nil)
+	db, err := bolt.Open("addresses.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,6 +34,12 @@ func main() {
 	if len(os.Args) >= 2 {
 		AddFromYaml(os.Args[2])
 	}
+
+	SaveToDB()
+
+	// for _, a := range addresses {
+	// 	fmt.Println(a.Yaml())
+	// }
 
 	err = serve()
 	fmt.Println(err)
